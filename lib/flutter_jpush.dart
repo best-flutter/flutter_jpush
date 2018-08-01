@@ -31,26 +31,104 @@ enum AppState{
 */
 class JPushNotification{
   JPushNotification({
+    this.alertType,
     this.buildId,
     this.id,
     this.title,
     this.badge,
     this.content,
-    this.extra,
+    this.extras,
     this.fireTime,
     this.sound,
-    this.appState
+    this.appState,
+    this.fromOpen:false,
+    this.subtitle
 });
 
+  factory JPushNotification.fromMap(dynamic dic,bool fromOpen){
+    print("Enter new ");
+    try{
+      if(Platform.isIOS){
+        dynamic aps = dic['aps'];
+        String appState = dic['appState'];
+        AppState state;
+        switch(appState){
+          case 'inactive':
+            state = AppState.inactive;
+            break;
+          case 'active':
+            state = AppState.active;
+            break;
+          case 'background':
+            state = AppState.background;
+            break;
+        }
+        dynamic alert = aps['alert'];
+        String content;
+        String title;
+        String subtitle;
+        if(alert is String){
+          content = alert;
+        }else{
+          title = alert['title'];
+          content = alert['body'];
+          subtitle = alert['subtitle'];
+
+        }
+
+
+        return new JPushNotification(
+
+            title:title,
+            badge: aps['badge'] as int,
+            content: content,
+            sound:aps['sound'],
+            extras: dic['extras'],
+            subtitle: subtitle,
+            appState: state,
+            id: dic['_j_msgid'],
+            fromOpen:fromOpen,
+            fireTime:new DateTime.now()
+        );
+
+      }else{
+
+        String content = dic['alertContent'];
+
+        return new JPushNotification(
+          alertType: dic['alertType'] as int,
+          content: content,
+          id: dic['id'] as int,
+          fromOpen: fromOpen,
+          fireTime: new DateTime.now(),
+
+        );
+
+
+      }
+    }catch(e){
+      print(e);
+
+      return new JPushNotification();
+    }
+  }
+
+  /// android only
+  final int alertType;
+  /// 是否是打开了提醒,还是直接受到的提醒
+  final bool fromOpen;
 
   final AppState appState;
+
+  final String subtitle;
 
   /// 通知样式：1 为基础样式，2 为自定义样式（需先调用 `setStyleCustom` 设置自定义样式
   /// Android Only
   final int buildId;
 
-  ///  通知 id, 可用于取消通知
+  ///  通知 id,
   final int id;
+
 
   //通知标题
   final String title;
@@ -59,7 +137,7 @@ class JPushNotification{
   final String content;
 
   //
-  final dynamic extra;
+  final dynamic extras;
 
   //通知触发时间(毫秒)
   final DateTime fireTime;
@@ -70,6 +148,7 @@ class JPushNotification{
 
   /// ios Only sound
   final String sound;
+
 
 
 }
@@ -99,7 +178,6 @@ class FlutterJpush {
   static const MethodChannel _channel = const MethodChannel('flutter_jpush');
 
   static bool isConnected = false;
-  static bool isLogin = false;
   static String registrationID;
 
   static Future<dynamic> startup() async{
@@ -119,8 +197,8 @@ class FlutterJpush {
         break;
       case 'networkDidLogin':
         {
-          isLogin =  call.arguments;
-          getRegistrationID().then( (String result)=> _networkDidLoginListenerListener.add(result) );
+          String regId =  call.arguments;
+          _networkDidLoginListenerListener.add(regId);
         }
         break;
       case 'receivePushMsg':
@@ -131,38 +209,17 @@ class FlutterJpush {
 
         }
         break;
+      case 'openNotification':
+        {
+          dynamic dic = call.arguments;
+          _recvOpenNotificationListener.add( new JPushNotification.fromMap(dic,true));
+
+        }
+        break;
       case 'receiveNotification':
         {
           dynamic dic = call.arguments;
-          if(Platform.isIOS){
-            dynamic aps = dic['aps'];
-            String appState = dic['appState'];
-            AppState state;
-            switch(appState){
-              case 'inactive':
-                state = AppState.inactive;
-                break;
-              case 'active':
-                state = AppState.active;
-                break;
-              case 'background':
-                state = AppState.background;
-                break;
-            }
-            JPushNotification notification = new JPushNotification(
-                title:"",
-                badge: aps['badge'] as int,
-                content: aps['alert'],
-                sound:aps['sound'],
-                extra: dic['extra'],
-                appState: state,
-                id: dic['_j_msgid'],
-                fireTime:new DateTime.now()
-            );
-            _recvNotificationListener.add(  notification );
-          }else{
-
-          }
+          _recvNotificationListener.add(  new JPushNotification.fromMap(dic,false) );
         }
         break;
     }
@@ -517,7 +574,7 @@ class FlutterJpush {
   static StreamController<String> _openNotificationLaunchAppListener = new StreamController.broadcast();
   static StreamController<String> _networkDidLoginListenerListener = new StreamController.broadcast();
   static StreamController<JPushNotification> _recvNotificationListener = new StreamController.broadcast();
-  static StreamController<dynamic> _recvOpenNotificationListener = new StreamController.broadcast();
+  static StreamController<JPushNotification> _recvOpenNotificationListener = new StreamController.broadcast();
   static StreamController<String> _getRegistrationIdListener = new StreamController.broadcast();
   static StreamController<bool> _connectionChangeListener = new StreamController.broadcast();
   static StreamController<Map> _receiveExtrasListener = new StreamController.broadcast();

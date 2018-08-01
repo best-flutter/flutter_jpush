@@ -1,0 +1,33 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_jpush (0.0.1):
+    - Flutter
+    - JPush
+  - JCore (1.1.7)
+  - JPush (3.0.8):
+    - JCore (~> 1.1.7)
+
+DEPENDENCIES:
+  - Flutter (from `.symlinks/flutter/ios-profile`)
+  - flutter_jpush (from `.symlinks/plugins/flutter_jpush/ios`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - JCore
+    - JPush
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: ".symlinks/flutter/ios-profile"
+  flutter_jpush:
+    :path: ".symlinks/plugins/flutter_jpush/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
+  flutter_jpush: b689386461c652c0d62d64c3db670705f853eb50
+  JCore: f7459c81c135281a874a6beafdd321666adcc834
+  JPush: 9574d072cc37e93fa293ba69b43ce763c440943a
+
+PODFILE CHECKSUM: 1e5af4103afd21ca5ead147d7b81d06f494f51a2
+
+COCOAPODS: 1.5.2
