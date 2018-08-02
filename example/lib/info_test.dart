@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class Info extends StatefulWidget{
   final bool isConnected;
   final String registrationId;
-  final List<JPushNotification> notificationList;
+  final List notificationList;
 
   Info({
     this.isConnected,
@@ -19,10 +19,6 @@ class Info extends StatefulWidget{
 }
 
 class _InfoState extends State<Info>{
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return new Column(
@@ -45,25 +41,52 @@ class _InfoState extends State<Info>{
           child: new Text("Push history:"),),
 
         new Expanded(child: new ListView.builder(itemBuilder: (context,int index){
-          JPushNotification notification = widget.notificationList[index];
-          return new Padding(padding: new EdgeInsets.all(10.0),
-            child: new Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                new Row(
-                  children: <Widget>[
-                    new Text("id:"),
-                    new Text(notification.id.toString())
-                  ],
-                ),
-                new Row(
-                  children: <Widget>[
-                    new Text("内容:"),
-                    new Text(notification.content)
-                  ],
-                ),
-              ],
-            ),);
+
+          var obj = widget.notificationList[index];
+          if(obj is JPushNotification){
+            JPushNotification notification = obj;
+            return new Padding(padding: new EdgeInsets.all(10.0),
+              child: new Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  new Row(
+                    children: <Widget>[
+                      new Text("id:"),
+                      new Text(notification.id.toString())
+                    ],
+                  ),
+                  new Row(
+                    children: <Widget>[
+                      new Text("内容:"),
+                      new Text(notification.content)
+                    ],
+                  ),
+                ],
+              ),);
+
+          }else{
+            JPushMessage message = obj;
+
+            return new Padding(padding: new EdgeInsets.all(10.0),
+              child: new Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  new Row(
+                    children: <Widget>[
+                      new Text("message:"),
+                      new Text(message.message)
+                    ],
+                  ),
+                  new Row(
+                    children: <Widget>[
+                      new Text("title:"),
+                      new Text(message.title)
+                    ],
+                  ),
+                ],
+              ),);
+          }
+
 
         },itemCount: widget.notificationList.length,))
       ],

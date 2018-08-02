@@ -4,9 +4,9 @@ Flutter 版本 jpush（极光推送），目前正在开发，预计本周开发
 
 ## ROADMAP
 
-* [ ] ios
-* [ ] android
-* [ ] 集成notification
+* [x] ios
+* [x] android
+* [x] 集成notification
 * [ ] 集成message
 * [ ] 集成alias
 * [ ] 集成tags

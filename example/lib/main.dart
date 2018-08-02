@@ -19,7 +19,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool isConnected = false;
   String registrationId;
-  List<JPushNotification> notificationList = [];
+  List notificationList = [];
 
   int _index = 0;
 
@@ -35,9 +35,9 @@ class _MyAppState extends State<MyApp> {
         this.isConnected = connected;
         if(connected){
           FlutterJpush.getRegistrationID().then( (String regId){
-            this.registrationId = regId;
+           print("主动获取设备号:$regId");
             setState(() {
-
+              this.registrationId = regId;
             });
           });
         }
@@ -69,11 +69,11 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    FlutterJpush.addReceiveCustomMsgListener( (Map msg){
+    FlutterJpush.addReceiveCustomMsgListener( (JPushMessage msg){
       setState(() {
         print("收到推送消息提醒: $msg");
         /// 打开了推送提醒
-
+        notificationList.add(msg);
       });
     });
 

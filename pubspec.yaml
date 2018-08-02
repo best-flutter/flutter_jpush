@@ -15,7 +15,7 @@ dependencies:
 flutter:
   plugin:
     androidPackage: com.jzoom.flutterjpush
-    pluginClass: FlutterJpushPlugin
+    pluginClass: FlutterJPushPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

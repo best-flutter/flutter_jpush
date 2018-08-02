@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -10,25 +11,38 @@ enum AppState{
   background
 }
 
-/*
-*
-*
-* // Android Only
-* @property {number} [buildId] - 通知样式：1 为基础样式，2 为自定义样式（需先调用 `setStyleCustom` 设置自定义样式）
-* @property {number} [id] - 通知 id, 可用于取消通知
-* @property {string} [title] - 通知标题
-* @property {string} [content] - 通知内容
-* @property {object} [extra] - extra 字段
-* @property {number} [fireTime] - 通知触发时间（毫秒）
-*
-*
-* // iOS Only
-* @property {number} [badge] - 本地推送触发后应用角标值
-* // iOS Only
-* @property {string} [soundName] - 指定推送的音频文件
-* // iOS 10+ Only
-* @property {string} [subtitle] - 子标题
-*/
+
+/// 自定义消息，一般不会在系统消息栏出现
+class JPushMessage{
+
+
+
+  // 消息主体 msg_content
+  final String message;
+
+  // content_type
+  final String contentType;
+
+  /// title
+  final String title;
+
+  /// extras
+  final Map extras;
+
+  JPushMessage({
+    this.message,
+    this.contentType,
+    this.title,
+    this.extras
+});
+
+  @override
+  String toString(){
+    return "PushMessage:{title:$title, message:$message, contentType:$contentType, extras:$extras}";
+  }
+}
+
+
 class JPushNotification{
   JPushNotification({
     this.alertType,
@@ -73,12 +87,9 @@ class JPushNotification{
           title = alert['title'];
           content = alert['body'];
           subtitle = alert['subtitle'];
-
         }
 
-
         return new JPushNotification(
-
             title:title,
             badge: aps['badge'] as int,
             content: content,
@@ -204,8 +215,21 @@ class FlutterJpush {
       case 'receivePushMsg':
         {
 
+          var map = call.arguments;
+          var extras = map['extras'];
+          if(extras!=null){
+            try{
+              extras = json.decode(extras);
+            }catch(e){
 
-
+            }
+          }
+          _recvCustomMsgController.add(new JPushMessage(
+              title: map['title'],
+              message: map['message'],
+              contentType: map['contentType'],
+              extras: extras
+          ));
 
         }
         break;
@@ -498,7 +522,7 @@ class FlutterJpush {
   /**
    * 监听：自定义消息后事件
    */
-  static void addReceiveCustomMsgListener ( void onData(Map data) ) {
+  static void addReceiveCustomMsgListener ( void onData(JPushMessage data) ) {
     listeners[onData] = _recvCustomMsgController.stream.listen(onData);
   }
 
@@ -570,7 +594,7 @@ class FlutterJpush {
     removeListener(onData);
   }
 
-  static StreamController<Map> _recvCustomMsgController = new StreamController.broadcast();
+  static StreamController<JPushMessage> _recvCustomMsgController = new StreamController.broadcast();
   static StreamController<String> _openNotificationLaunchAppListener = new StreamController.broadcast();
   static StreamController<String> _networkDidLoginListenerListener = new StreamController.broadcast();
   static StreamController<JPushNotification> _recvNotificationListener = new StreamController.broadcast();

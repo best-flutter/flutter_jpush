@@ -116,7 +116,7 @@
 
         <!-- User defined.  For test only  用户自定义的广播接收器-->
         <receiver
-            android:name="com.jzoom.flutterjpush.FlutterJpushPlugin$JPushReceiver"
+            android:name="com.jzoom.flutterjpush.FlutterJPushPlugin$JPushReceiver"
             android:exported="false"
             android:enabled="true">
             <intent-filter>
@@ -129,7 +129,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.jzoom.flutterjpush.FlutterJpushPlugin$MyJPushMessageReceiver">
+        <receiver android:name="com.jzoom.flutterjpush.FlutterJPushPlugin$MyJPushMessageReceiver">
             <intent-filter>
                 <action android:name="cn.jpush.android.intent.RECEIVE_MESSAGE" />
                 <category android:name="${applicationId}" />
