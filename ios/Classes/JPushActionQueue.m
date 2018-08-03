@@ -62,7 +62,7 @@
 - (void)scheduleGetRidCallbacks {
   if (self.getRidCallbackArr.count == 0) return;
   for (FlutterResult callback in self.getRidCallbackArr) {
-    callback(@[[JPUSHService registrationID]]);
+    callback([JPUSHService registrationID]);
   }
   [self.getRidCallbackArr removeAllObjects];
   

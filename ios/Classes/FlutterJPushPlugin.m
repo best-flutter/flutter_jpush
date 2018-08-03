@@ -11,7 +11,7 @@
 #import "JPushActionQueue.h"
 #import "JPUSHService.h"
 
-@interface FlutterJpushPlugin ()<JPUSHRegisterDelegate> {
+@interface FlutterJPushPlugin ()<JPUSHRegisterDelegate> {
     BOOL _isJPushDidLogin;
 }
 
@@ -21,12 +21,12 @@
 
 
 
-@implementation FlutterJpushPlugin
+@implementation FlutterJPushPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     FlutterMethodChannel* channel = [FlutterMethodChannel
                                      methodChannelWithName:@"flutter_jpush"
                                      binaryMessenger:[registrar messenger]];
-    FlutterJpushPlugin* instance = [FlutterJpushPlugin sharedInstance];
+    FlutterJPushPlugin* instance = [FlutterJPushPlugin sharedInstance];
     instance.channel = channel;
     [JPushActionQueue sharedInstance].isFlutterDidLoad = YES;
     [registrar addMethodCallDelegate:instance channel:channel];
@@ -146,11 +146,11 @@
     }
 }
 
-+(FlutterJpushPlugin*)sharedInstance{
-    static FlutterJpushPlugin *sharedInstance = nil;
++(FlutterJPushPlugin*)sharedInstance{
+    static FlutterJPushPlugin *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[FlutterJpushPlugin alloc]init];
+        sharedInstance = [[FlutterJPushPlugin alloc]init];
     });
     return sharedInstance;
 }
@@ -283,21 +283,21 @@
     NSDictionary *notification;
     if ([JPushActionQueue sharedInstance].openedRemoteNotification != nil) {
         notification = [self jpushFormatNotification: [JPushActionQueue sharedInstance].openedRemoteNotification];
-        callback(@[notification]);
+        callback(notification);
         return;
     }
     
     if ([JPushActionQueue sharedInstance].openedLocalNotification != nil) {
         notification = [self jpushFormatNotification:[JPushActionQueue sharedInstance].openedLocalNotification];
-        callback(@[notification]);
+        callback(notification);
         return;
     }
     
-    callback(@[]);
+    callback([NSNull null]);
 }
 
 -(void)getApplicationIconBadge:(FlutterResult)callback{
-    callback(@[@([UIApplication sharedApplication].applicationIconBadgeNumber)]);
+    callback(@([UIApplication sharedApplication].applicationIconBadgeNumber));
 }
 
 // TODO:
@@ -412,7 +412,7 @@
 }
 
 -(void)addEvent:(NSString *)name location:(NSString *)location callback:(FlutterResult)callback{
-    callback(@[name]);
+    callback(name);
 }
 
 
@@ -461,11 +461,11 @@
     self.asyCallback = callback;
     [JPUSHService setTags:tagSet completion:^(NSInteger iResCode, NSSet *iTags, NSInteger seq) {
         if (iResCode == 0) {
-            callback(@[@{@"tags": [iTags allObjects] ?: @[],
+            callback(@{@"tags": [iTags allObjects] ?: @[],
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -479,11 +479,11 @@
     self.asyCallback = callback;
     [JPUSHService setAlias:alias completion:^(NSInteger iResCode, NSString *iAlias, NSInteger seq) {
         if (iResCode == 0) {
-            callback(@[@{@"alias": iAlias ?: @"",
+            callback(@{@"alias": iAlias ?: @"",
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -497,11 +497,11 @@
     }
     [JPUSHService addTags:tagSet completion:^(NSInteger iResCode, NSSet *iTags, NSInteger seq) {
         if (iResCode == 0) {
-            callback(@[@{@"tags": [iTags allObjects] ?: @[],
+            callback(@{@"tags": [iTags allObjects] ?: @[],
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -515,11 +515,11 @@
     }
     [JPUSHService deleteTags:tagSet completion:^(NSInteger iResCode, NSSet *iTags, NSInteger seq) {
         if (iResCode == 0) {
-            callback(@[@{@"tags": [iTags allObjects] ?: @[],
+            callback(@{@"tags": [iTags allObjects] ?: @[],
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -527,11 +527,11 @@
 -(void)cleanTags:(FlutterResult)callback{
     [JPUSHService cleanTags:^(NSInteger iResCode, NSSet *iTags, NSInteger seq) {
         if (iResCode == 0) {
-            callback(@[@{@"tags": [iTags allObjects] ?: @[],
+            callback(@{@"tags": [iTags allObjects] ?: @[],
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -539,11 +539,11 @@
 -(void)getAllTags:(FlutterResult)callback{
     [JPUSHService getAllTags:^(NSInteger iResCode, NSSet *iTags, NSInteger seq) {
         if (iResCode == 0) {
-            callback(@[@{@"tags": [iTags allObjects] ?: @[],
+            callback(@{@"tags": [iTags allObjects] ?: @[],
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -552,11 +552,11 @@
                 callback:(FlutterResult)callback{
     [JPUSHService validTag:tag completion:^(NSInteger iResCode, NSSet *iTags, NSInteger seq, BOOL isBind) {
         if (iResCode == 0) {
-            callback(@[@{@"isBind": @(isBind),
+            callback(@{@"isBind": @(isBind),
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -564,11 +564,11 @@
 -(void)deleteAlias:(FlutterResult)callback{
     [JPUSHService deleteAlias:^(NSInteger iResCode, NSString *iAlias, NSInteger seq) {
         if (iResCode == 0) {
-            callback(@[@{@"alias": iAlias ?: @"",
+            callback(@{@"alias": iAlias ?: @"",
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -576,11 +576,11 @@
 -(void)getAlias:(FlutterResult)callback{
     [JPUSHService getAlias:^(NSInteger iResCode, NSString *iAlias, NSInteger seq) {
         if (iResCode == 0) {
-            callback(@[@{@"alias": iAlias ?: @"",
+            callback(@{@"alias": iAlias ?: @"",
                          @"errorCode": @(0)
-                         }]);
+                         });
         } else {
-            callback(@[@{@"errorCode": @(iResCode)}]);
+            callback(@{@"errorCode": @(iResCode)});
         }
     } seq: 0];
 }
@@ -832,7 +832,7 @@
 -(void)setBadge:(NSInteger)value callback:(FlutterResult)callback{// ->Bool
     [[UIApplication sharedApplication] setApplicationIconBadgeNumber:value];
     NSNumber *badgeNumber = [NSNumber numberWithBool:[JPUSHService setBadge: value]];
-    callback(@[badgeNumber]);
+    callback(badgeNumber);
 }
 
 /*!
@@ -864,7 +864,7 @@
 -(void)getRegistrationID:(FlutterResult)callback{// -> string
 #if TARGET_IPHONE_SIMULATOR//模拟器
     NSLog(@"simulator can not get registrationid");
-    callback(@[@""]);
+    callback(@"");
 #elif TARGET_OS_IPHONE//真机
     if (_isJPushDidLogin) {
         callback([JPUSHService registrationID]);

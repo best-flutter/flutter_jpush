@@ -1,6 +1,6 @@
 #import <Flutter/Flutter.h>
 
-@interface FlutterJpushPlugin : NSObject<FlutterPlugin>
+@interface FlutterJPushPlugin : NSObject<FlutterPlugin>
 
 @property(strong,nonatomic)FlutterResult asyCallback;
 
@@ -8,5 +8,5 @@
 
 -(void)startup:(NSDictionary*)launchOptions appKey:(NSString*)appKey channel:(NSString*)channel isProduction:(BOOL)isProduction;
 
-+(FlutterJpushPlugin*)sharedInstance;
++(FlutterJPushPlugin*)sharedInstance;
 @end

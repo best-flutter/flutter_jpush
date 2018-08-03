@@ -8,7 +8,6 @@ import 'package:flutter_jpush_example/info_test.dart';
 import 'package:flutter_jpush_example/push_test.dart';
 import 'package:flutter_jpush_example/tag_test.dart';
 
-
 void main() => runApp(new MyApp());
 
 class MyApp extends StatefulWidget {
@@ -28,14 +27,14 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _startupJpush();
 
-    FlutterJpush.addConnectionChangeListener( (bool connected){
+    FlutterJPush.addConnectionChangeListener((bool connected) {
       setState(() {
         /// 是否连接，连接了才可以推送
         print("连接状态改变:$connected");
         this.isConnected = connected;
-        if(connected){
-          FlutterJpush.getRegistrationID().then( (String regId){
-           print("主动获取设备号:$regId");
+        if (connected) {
+          FlutterJPush.getRegistrationID().then((String regId) {
+            print("主动获取设备号:$regId");
             setState(() {
               this.registrationId = regId;
             });
@@ -44,7 +43,7 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    FlutterJpush.addnetworkDidLoginListener( (String registrationId){
+    FlutterJPush.addnetworkDidLoginListener((String registrationId) {
       setState(() {
         /// 用于推送
         print("收到设备号:$registrationId");
@@ -52,38 +51,38 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    FlutterJpush.addReceiveNotificationListener( (JPushNotification notification){
+    FlutterJPush
+        .addReceiveNotificationListener((JPushNotification notification) {
       setState(() {
         /// 收到推送
         print("收到推送提醒: $notification");
         notificationList.add(notification);
       });
-
     });
 
-    FlutterJpush.addReceiveOpenNotificationListener( (JPushNotification notification){
+    FlutterJPush
+        .addReceiveOpenNotificationListener((JPushNotification notification) {
       setState(() {
         print("打开了推送提醒: $notification");
+
         /// 打开了推送提醒
         notificationList.add(notification);
       });
     });
 
-    FlutterJpush.addReceiveCustomMsgListener( (JPushMessage msg){
+    FlutterJPush.addReceiveCustomMsgListener((JPushMessage msg) {
       setState(() {
         print("收到推送消息提醒: $msg");
+
         /// 打开了推送提醒
         notificationList.add(msg);
       });
     });
-
   }
 
-
-
-  void _startupJpush() async{
+  void _startupJpush() async {
     print("初始化jpush");
-    await FlutterJpush.startup();
+    await FlutterJPush.startup();
     print("初始化jpush成功");
   }
 
@@ -99,27 +98,35 @@ class _MyAppState extends State<MyApp> {
         appBar: new AppBar(
           title: const Text('JPush Example'),
         ),
-        body:new IndexedStack(
+        body: new IndexedStack(
           children: <Widget>[
-            new Info(notificationList: notificationList,registrationId: registrationId,isConnected: isConnected,),
+            new Info(
+              notificationList: notificationList,
+              registrationId: registrationId,
+              isConnected: isConnected,
+            ),
             new TagSet(),
             new AliasSet(),
             new PushTest()
-
           ],
           index: _index,
-
         ),
         bottomNavigationBar: new BottomNavigationBar(
           items: <BottomNavigationBarItem>[
-            new BottomNavigationBarItem(title: new Text("Info"),icon: new Icon( Icons.info)),
-            new BottomNavigationBarItem(title: new Text("Tag"),icon: new Icon( Icons.tag_faces)),
-            new BottomNavigationBarItem(title: new Text("Alias"),icon: new Icon( Icons.nature)),
-          ],onTap: (int index){
-          setState(() {
-            _index = index;
-          });
-        },currentIndex: _index,),
+            new BottomNavigationBarItem(
+                title: new Text("Info"), icon: new Icon(Icons.info)),
+            new BottomNavigationBarItem(
+                title: new Text("Tag"), icon: new Icon(Icons.tag_faces)),
+            new BottomNavigationBarItem(
+                title: new Text("Alias"), icon: new Icon(Icons.nature)),
+          ],
+          onTap: (int index) {
+            setState(() {
+              _index = index;
+            });
+          },
+          currentIndex: _index,
+        ),
       ),
     );
   }

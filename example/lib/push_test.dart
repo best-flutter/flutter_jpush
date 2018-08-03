@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 
-class PushTest extends StatefulWidget{
+class PushTest extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     return new _PushTestState();
   }
 }
 
-class _PushTestState extends State<PushTest>{
+class _PushTestState extends State<PushTest> {
   @override
   Widget build(BuildContext context) {
-    return new Column(
-
-    );
+    return new Column();
   }
-
 }

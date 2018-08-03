@@ -91,7 +91,7 @@ public class FlutterJPushPlugin implements MethodCallHandler {
         if ("initPush".equals(method)) {
             this.initPush();
             result.success(true);
-        } else if ("startup".equals(method)) {
+        }else if ("startup".equals(method)) {
             this.startup();
             result.success(true);
         } else if ("getInfo".equals(method)) {
@@ -717,7 +717,7 @@ public class FlutterJPushPlugin implements MethodCallHandler {
             Result result = sCacheMap.get(jPushMessage.getSequence());
             if (null != result) {
                 Map map = new HashMap();
-                List array = new ArrayList();
+                List<String> array = new ArrayList<String>();
                 Set<String> tags = jPushMessage.getTags();
                 for (String str : tags) {
                     array.add(str);

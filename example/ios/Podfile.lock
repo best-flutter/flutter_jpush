@@ -8,7 +8,7 @@ PODS:
     - JCore (~> 1.1.7)
 
 DEPENDENCIES:
-  - Flutter (from `.symlinks/flutter/ios-profile`)
+  - Flutter (from `.symlinks/flutter/ios`)
   - flutter_jpush (from `.symlinks/plugins/flutter_jpush/ios`)
 
 SPEC REPOS:
@@ -18,7 +18,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Flutter:
-    :path: ".symlinks/flutter/ios-profile"
+    :path: ".symlinks/flutter/ios"
   flutter_jpush:
     :path: ".symlinks/plugins/flutter_jpush/ios"
 

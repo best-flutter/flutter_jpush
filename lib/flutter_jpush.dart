@@ -4,19 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
-
-enum AppState{
-  inactive,
-  active,
-  background
-}
-
+enum AppState { inactive, active, background }
 
 /// 自定义消息，一般不会在系统消息栏出现
-class JPushMessage{
-
-
-
+class JPushMessage {
   // 消息主体 msg_content
   final String message;
 
@@ -29,44 +20,37 @@ class JPushMessage{
   /// extras
   final Map extras;
 
-  JPushMessage({
-    this.message,
-    this.contentType,
-    this.title,
-    this.extras
-});
+  JPushMessage({this.message, this.contentType, this.title, this.extras});
 
   @override
-  String toString(){
+  String toString() {
     return "PushMessage:{title:$title, message:$message, contentType:$contentType, extras:$extras}";
   }
 }
 
+class JPushNotification {
+  JPushNotification(
+      {this.alertType,
+      this.buildId,
+      this.id,
+      this.title,
+      this.badge,
+      this.content,
+      this.extras,
+      this.fireTime,
+      this.sound,
+      this.appState,
+      this.fromOpen: false,
+      this.subtitle});
 
-class JPushNotification{
-  JPushNotification({
-    this.alertType,
-    this.buildId,
-    this.id,
-    this.title,
-    this.badge,
-    this.content,
-    this.extras,
-    this.fireTime,
-    this.sound,
-    this.appState,
-    this.fromOpen:false,
-    this.subtitle
-});
-
-  factory JPushNotification.fromMap(dynamic dic,bool fromOpen){
+  factory JPushNotification.fromMap(dynamic dic, bool fromOpen) {
     print("Enter new ");
-    try{
-      if(Platform.isIOS){
+    try {
+      if (Platform.isIOS) {
         dynamic aps = dic['aps'];
         String appState = dic['appState'];
         AppState state;
-        switch(appState){
+        switch (appState) {
           case 'inactive':
             state = AppState.inactive;
             break;
@@ -81,29 +65,26 @@ class JPushNotification{
         String content;
         String title;
         String subtitle;
-        if(alert is String){
+        if (alert is String) {
           content = alert;
-        }else{
+        } else {
           title = alert['title'];
           content = alert['body'];
           subtitle = alert['subtitle'];
         }
 
         return new JPushNotification(
-            title:title,
+            title: title,
             badge: aps['badge'] as int,
             content: content,
-            sound:aps['sound'],
+            sound: aps['sound'],
             extras: dic['extras'],
             subtitle: subtitle,
             appState: state,
             id: dic['_j_msgid'],
-            fromOpen:fromOpen,
-            fireTime:new DateTime.now()
-        );
-
-      }else{
-
+            fromOpen: fromOpen,
+            fireTime: new DateTime.now());
+      } else {
         String content = dic['alertContent'];
 
         return new JPushNotification(
@@ -112,12 +93,9 @@ class JPushNotification{
           id: dic['id'] as int,
           fromOpen: fromOpen,
           fireTime: new DateTime.now(),
-
         );
-
-
       }
-    }catch(e){
+    } catch (e) {
       print(e);
 
       return new JPushNotification();
@@ -126,6 +104,7 @@ class JPushNotification{
 
   /// android only
   final int alertType;
+
   /// 是否是打开了提醒,还是直接受到的提醒
   final bool fromOpen;
 
@@ -139,7 +118,6 @@ class JPushNotification{
 
   ///  通知 id,
   final int id;
-
 
   //通知标题
   final String title;
@@ -159,47 +137,38 @@ class JPushNotification{
 
   /// ios Only sound
   final String sound;
-
-
-
 }
 
-class JPushAndroidInfo{
+class JPushAndroidInfo {
   //TO DO
 }
 
-class JPushResult{
-  //原始数据
-  final dynamic raw;
-  //code
+class JPushResult {
+  //出了code以外的其他数据,当code=0的时候有效
+  final dynamic result;
+  //code = 0 正确
   final int code;
 
-  JPushResult({
-    this.code:null,
-    this.raw
-  });
+  JPushResult({this.code: null, this.result});
 
-  bool isSuccess(){
-    return code == 0;
-  }
+  bool get isOk => code == 0;
 }
 
-
-class FlutterJpush {
+class FlutterJPush {
   static const MethodChannel _channel = const MethodChannel('flutter_jpush');
 
   static bool isConnected = false;
   static String registrationID;
 
-  static Future<dynamic> startup() async{
+  static Future<dynamic> startup() async {
     _channel.setMethodCallHandler(_handler);
     return await _channel.invokeMethod("startup");
   }
 
-  static Future<dynamic> _handler(MethodCall call){
+  static Future<dynamic> _handler(MethodCall call) {
     print("handle mehtod call ${call.method} ${call.arguments}");
     String method = call.method;
-    switch(method){
+    switch (method) {
       case 'connectionChange':
         {
           isConnected = call.arguments;
@@ -208,100 +177,95 @@ class FlutterJpush {
         break;
       case 'networkDidLogin':
         {
-          String regId =  call.arguments;
+          String regId = call.arguments;
           _networkDidLoginListenerListener.add(regId);
         }
         break;
       case 'receivePushMsg':
         {
-
           var map = call.arguments;
           var extras = map['extras'];
-          if(extras!=null){
-            try{
-              extras = json.decode(extras);
-            }catch(e){
-
-            }
+          if (extras != null) {
+            try {
+              if (extras is String) {
+                extras = json.decode(extras);
+              }
+            } catch (e) {}
           }
           _recvCustomMsgController.add(new JPushMessage(
               title: map['title'],
-              message: map['message'],
-              contentType: map['contentType'],
-              extras: extras
-          ));
-
+              message: map['message'] ?? map['content'],
+              contentType: map['contentType'] ?? map['content_type'],
+              extras: extras));
         }
         break;
       case 'openNotification':
         {
           dynamic dic = call.arguments;
-          _recvOpenNotificationListener.add( new JPushNotification.fromMap(dic,true));
-
+          _recvOpenNotificationListener
+              .add(new JPushNotification.fromMap(dic, true));
         }
         break;
       case 'receiveNotification':
         {
           dynamic dic = call.arguments;
-          _recvNotificationListener.add(  new JPushNotification.fromMap(dic,false) );
+          _recvNotificationListener
+              .add(new JPushNotification.fromMap(dic, false));
         }
         break;
     }
     return new Future.value(null);
   }
 
-
-
-
   /**
    * 初始化JPush 必须先初始化才能执行其他操作
    */
-  static Future<void> initPush () async{
+  static Future<void> initPush() async {
     if (Platform.isAndroid) {
       await _channel.invokeMethod("initPush");
     } else {
-      FlutterJpush.setupPush();
+      FlutterJPush.setupPush();
     }
   }
-
 
   /**
    * iOS Only
    * 初始化 Jpush SDK 代码,
    * NOTE: 如果已经在原生 SDK 中添加初始化代码则无需再调用 （通过脚本配置，会自动在原生中添加初始化，无需额外调用）
    */
-  static Future<void> setupPush () async{
+  static Future<void> setupPush() async {
     await _channel.invokeMethod("setupPush");
   }
+
   /**
    * 停止推送，调用该方法后将不再受到推送
    */
-  static Future<void> stopPush () async {
+  static Future<void> stopPush() async {
     await _channel.invokeMethod("stopPush");
   }
 
   /**
    * 恢复推送功能，停止推送后，可调用该方法重新获得推送能力
    */
-  static Future<void> resumePush () async {
+  static Future<void> resumePush() async {
     if (Platform.isAndroid) {
       await _channel.invokeMethod("resumePush");
     } else {
-      FlutterJpush.setupPush();
+      FlutterJPush.setupPush();
     }
   }
 
   /**
    * Android Only
    */
-  static Future<void> crashLogOFF () async {
+  static Future<void> crashLogOFF() async {
     await _channel.invokeMethod("crashLogOFF");
   }
 
   /**
    * Android Only
    */
-  static Future<void> crashLogON () async{
+  static Future<void> crashLogON() async {
     await _channel.invokeMethod("crashLogON");
   }
 
@@ -310,33 +274,33 @@ class FlutterJpush {
    *
    * @param {Function} cb
    */
-  static Future<void> notifyJSDidLoad () async {
+  static Future<void> notifyJSDidLoad() async {
     await _channel.invokeMethod("notifyJSDidLoad");
   }
 
   /**
    * 清除通知栏的所有通知
    */
-  static Future<void> clearAllNotifications () async{
+  static Future<void> clearAllNotifications() async {
     if (Platform.isAndroid) {
       await _channel.invokeMethod("clearAllNotifications");
     } else {
-      await FlutterJpush.setBadge(0);
+      await FlutterJPush.setBadge(0);
     }
   }
 
   /**
    * Android Only
    */
-  static Future<void> clearNotificationById (int id) async {
-    await _channel.invokeMethod("clearNotificationById",id);
+  static Future<void> clearNotificationById(int id) async {
+    await _channel.invokeMethod("clearNotificationById", id);
   }
 
   /**
    * Android Only
    */
-  static Future<JPushAndroidInfo> getInfo () async{
-    Map map  = await _channel.invokeMethod("getInfo");
+  static Future<JPushAndroidInfo> getInfo() async {
+    Map map = await _channel.invokeMethod("getInfo");
     return new JPushAndroidInfo();
   }
 
@@ -345,30 +309,20 @@ class FlutterJpush {
    * 如果连接状态变更为已连接返回 true
    * 如果连接状态变更为断开连接连接返回 false
    */
-  static Future<bool> getConnectionState () async {
+  static Future<bool> getConnectionState() async {
     return await _channel.invokeMethod("getConnectionState");
   }
 
-  /**
-   * 重新设置 Tag
-   *
-   * @param {Array} tags = [String]
-   * 如果成功 result = {tags: [String]}
-   * 如果失败 result = {errorCode: Int}
-   */
-  static Future<dynamic> setTags (List<String> tags) async{
-    return await _channel.invokeMethod("setTags",tags);
+  ///重新设置 Tag
+  static Future<JPushResult> setTags(List<String> tags) async {
+    var raw = await _channel.invokeMethod("setTags", tags);
+    return new JPushResult(code: raw["errorCode"], result: raw['tags']);
   }
 
-  /**
-   * 在原有 tags 的基础上添加 tags
-   *
-   * @param {Array} tags = [String]
-   * 如果成功 result = {tags: [String]}
-   * 如果失败 result = {errorCode: Int}
-   */
-  static Future<dynamic> addTags (List<String> tags) async {
-    return await _channel.invokeMethod("addTags",tags);
+  ///在原有 tags 的基础上添加 tags
+  static Future<JPushResult> addTags(List<String> tags) async {
+    var raw = await _channel.invokeMethod("addTags", tags);
+    return new JPushResult(code: raw["errorCode"], result: raw['tags']);
   }
 
   /**
@@ -379,9 +333,9 @@ class FlutterJpush {
    * 如果失败 result = {errorCode: Int}
    *
    */
-  static Future<JPushResult> deleteTags (tags) async{
-    dynamic raw = await _channel.invokeMethod("deleteTags",tags);
-    return new JPushResult(code: raw["errorCode"] , raw: raw);
+  static Future<JPushResult> deleteTags(List<String> tags) async {
+    dynamic raw = await _channel.invokeMethod("deleteTags", tags);
+    return new JPushResult(code: raw["errorCode"], result: raw['tags']);
   }
 
   /**
@@ -391,96 +345,75 @@ class FlutterJpush {
    * 如果失败 result = {errorCode: Int}
    *
    */
-  static Future<JPushResult> cleanTags () async {
-    await _channel.invokeMethod("cleanTags");
+  static Future<JPushResult> cleanTags() async {
+    var data = await _channel.invokeMethod("cleanTags");
+    return new JPushResult(
+        code: data['errorCode'] as int, result: data['tags']);
   }
 
-  /**
-   * 获取所有已有标签
-   *
-   * 如果成功 result = {tags: [String]}
-   * 如果失败 result = {errorCode: Int}
-   *
-   */
-  static Future<JPushResult> getAllTags (cb) async {
-    await _channel.invokeMethod("getAllTags");
+  /// 获取标签
+  static Future<JPushResult> getAllTags() async {
+    var data = await _channel.invokeMethod("getAllTags");
+    return new JPushResult(
+        code: data['errorCode'] as int, result: data['tags']);
   }
 
-  /**
-   * 检查当前设备是否绑定该 tag
-   *
-   * @param {String} tag
-   * @param {Function} cb = (result) => { }
-   * 如果成功 result = {isBind: true}
-   * 如果失败 result = {errorCode: Int}
-   *
-   */
-  static Future<JPushResult> checkTagBindState (String tag) async {
-    await _channel.invokeMethod("checkTagBindState",tag);
+  /// 检查当前设备是否绑定该 tag
+  static Future<JPushResult> checkTagBindState(String tag) async {
+    var data = await _channel.invokeMethod("checkTagBindState", tag);
+    return new JPushResult(
+        code: data['errorCode'] as int,
+        result: {"tag": data['tag'], "bindState": data['bindState']});
   }
 
-  /**
-   * 重置 alias
-   * @param {String} alias
-   * @param {Function} cb = (result) => { }
-   * 如果成功 result = {alias: String}
-   * 如果失败 result = {errorCode: Int}
-   *
-   */
-  static Future<JPushResult> setAlias (String alias) async {
-    await _channel.invokeMethod("setAlias",alias);
+  /// 设置别名
+  static Future<JPushResult> setAlias(String alias) async {
+    var data = await _channel.invokeMethod("setAlias", alias);
+    return new JPushResult(
+        code: data['errorCode'] as int, result: data['alias']);
   }
 
-  /**
-   * 删除原有 alias
-   *
-   * @param {Function} cb = (result) => { }
-   * 如果成功 result = {alias: String}
-   * 如果失败 result = {errorCode: Int}
-   *
-   */
-  static Future<JPushResult> deleteAlias () async {
-    await _channel.invokeMethod("deleteAlias");
+  /// 删除别名
+  static Future<JPushResult> deleteAlias() async {
+    var data = await _channel.invokeMethod("deleteAlias");
+    return new JPushResult(
+        code: data['errorCode'] as int, result: data['alias']);
   }
 
-  /**
-   * 获取当前设备 alias
-   *
-   * 如果成功 result = {alias: String}
-   * 如果失败 result = {errorCode: Int}
-   *
-   */
-  static Future<JPushResult> getAlias () async {
-    await _channel.invokeMethod("getAlias");
+  /// 获取别名
+  static Future<JPushResult> getAlias() async {
+    var data = await _channel.invokeMethod("getAlias");
+    return new JPushResult(
+        code: data['errorCode'] as int, result: data['alias']);
   }
 
   /**
    * Android Only
    */
-  static Future<void> setStyleBasic () async {
+  static Future<void> setStyleBasic() async {
     await _channel.invokeMethod("setStyleBasic");
   }
 
   /**
    * Android Only
    */
-  static Future<void> setStyleCustom () async{
+  static Future<void> setStyleCustom() async {
     await _channel.invokeMethod("setStyleCustom");
   }
 
   /**
    * Android Only
    */
-  static Future<void> setLatestNotificationNumber (int maxNumber) async{
-    await _channel.invokeMethod("setLatestNotificationNumber",maxNumber);
+  static Future<void> setLatestNotificationNumber(int maxNumber) async {
+    await _channel.invokeMethod("setLatestNotificationNumber", maxNumber);
   }
 
   /**
    * Android Only
    * @param {object} config = {"startTime": String, "endTime": String}  // 例如：{startTime: "20:30", endTime: "8:30"}
    */
-  static Future<void> setSilenceTime (config) async{
-    await _channel.invokeMethod("setSilenceTime",config);
+  static Future<void> setSilenceTime(config) async {
+    await _channel.invokeMethod("setSilenceTime", config);
   }
 
   /**
@@ -488,58 +421,55 @@ class FlutterJpush {
    * @param {object} config = {"days": Array, "startHour": Number, "endHour": Number}
    * // 例如：{days: [0, 6], startHour: 8, endHour: 23} 表示星期天和星期六的上午 8 点到晚上 11 点都可以推送
    */
-  static Future<void> setPushTime (config) async {
-    await _channel.invokeMethod("setPushTime",config);
+  static Future<void> setPushTime(config) async {
+    await _channel.invokeMethod("setPushTime", config);
   }
 
   /**
    * Android Only
    */
-  static Future<void> jumpToPushActivity (String activityName) async {
-    await _channel.invokeMethod("jumpToPushActivity",activityName);
+  static Future<void> jumpToPushActivity(String activityName) async {
+    await _channel.invokeMethod("jumpToPushActivity", activityName);
   }
 
   /**
    * Android Only
    */
-  static Future<void> jumpToPushActivityWithParams (String activityName, Map<String,dynamic> map) async {
-    await _channel.invokeMethod("jumpToPushActivityWithParams",{"activityName":activityName, map:map});
+  static Future<void> jumpToPushActivityWithParams(
+      String activityName, Map<String, dynamic> map) async {
+    await _channel.invokeMethod("jumpToPushActivityWithParams",
+        {"activityName": activityName, map: map});
   }
 
   /**
    * Android Only
    */
-  static Future<void> finishActivity () async{
+  static Future<void> finishActivity() async {
     await _channel.invokeMethod("finishActivity");
   }
 
-
-  static Map<Function,StreamSubscription> listeners = {
-
-  };
-
+  static Map<Function, StreamSubscription> listeners = {};
 
   /**
    * 监听：自定义消息后事件
    */
-  static void addReceiveCustomMsgListener ( void onData(JPushMessage data) ) {
+  static void addReceiveCustomMsgListener(void onData(JPushMessage data)) {
     listeners[onData] = _recvCustomMsgController.stream.listen(onData);
   }
 
   /**
    * 取消监听：自定义消息后事件
    */
-  static void removeReceiveCustomMsgListener (void onData(Map data)) {
+  static void removeReceiveCustomMsgListener(void onData(Map data)) {
     removeListener(onData);
   }
 
-  static void removeListener(void onData(dynamic data)){
+  static void removeListener(void onData(dynamic data)) {
     StreamSubscription listener = listeners[onData];
-    if(listener==null)return;
+    if (listener == null) return;
     listener.cancel();
     listeners.remove(onData);
   }
-
 
   /**
    * iOS Only
@@ -548,7 +478,7 @@ class FlutterJpush {
    * 如果不是通过点击推送启动应用，比如点击应用 icon 直接启动应用，notification 会返回 undefine。
    * @param {Function} cb = (notification) => {}
    */
-  static getLaunchAppNotification () async {
+  static getLaunchAppNotification() async {
     await _channel.invokeMethod("getLaunchAppNotification");
   }
 
@@ -560,8 +490,10 @@ class FlutterJpush {
    *
    * @param {Function} cb = (notification) => {}
    */
-  static void addOpenNotificationLaunchAppListener (void onData(String registrationId)) {
-    listeners[onData] = _openNotificationLaunchAppListener.stream.listen(onData);
+  static void addOpenNotificationLaunchAppListener(
+      void onData(String registrationId)) {
+    listeners[onData] =
+        _openNotificationLaunchAppListener.stream.listen(onData);
   }
 
   /**
@@ -570,7 +502,8 @@ class FlutterJpush {
    * 取消监听：应用没有启动的状态点击推送打开应用
    * @param {Function} cb = () => {}
    */
-  static removeOpenNotificationLaunchAppEventListener (void onData(String registrationId)) {
+  static removeOpenNotificationLaunchAppEventListener(
+      void onData(String registrationId)) {
     removeListener(onData);
   }
 
@@ -580,8 +513,8 @@ class FlutterJpush {
    * 监听：应用连接已登录
    * @param {Function} cb = () => {}
    */
-  static void addnetworkDidLoginListener (void onData(String registrationId)) {
-    listeners[onData] =_networkDidLoginListenerListener.stream.listen(onData);
+  static void addnetworkDidLoginListener(void onData(String registrationId)) {
+    listeners[onData] = _networkDidLoginListenerListener.stream.listen(onData);
   }
 
   /**
@@ -590,30 +523,33 @@ class FlutterJpush {
    * 取消监听：应用连接已登录
    * @param {Function} cb = () => {}
    */
-  static void removenetworkDidLoginListener (void onData(String registrationId)) {
+  static void removenetworkDidLoginListener(
+      void onData(String registrationId)) {
     removeListener(onData);
   }
 
-  static StreamController<JPushMessage> _recvCustomMsgController = new StreamController.broadcast();
-  static StreamController<String> _openNotificationLaunchAppListener = new StreamController.broadcast();
-  static StreamController<String> _networkDidLoginListenerListener = new StreamController.broadcast();
-  static StreamController<JPushNotification> _recvNotificationListener = new StreamController.broadcast();
-  static StreamController<JPushNotification> _recvOpenNotificationListener = new StreamController.broadcast();
-  static StreamController<String> _getRegistrationIdListener = new StreamController.broadcast();
-  static StreamController<bool> _connectionChangeListener = new StreamController.broadcast();
-  static StreamController<Map> _receiveExtrasListener = new StreamController.broadcast();
-
-
-
-
-
-
-
+  static StreamController<JPushMessage> _recvCustomMsgController =
+      new StreamController.broadcast();
+  static StreamController<String> _openNotificationLaunchAppListener =
+      new StreamController.broadcast();
+  static StreamController<String> _networkDidLoginListenerListener =
+      new StreamController.broadcast();
+  static StreamController<JPushNotification> _recvNotificationListener =
+      new StreamController.broadcast();
+  static StreamController<JPushNotification> _recvOpenNotificationListener =
+      new StreamController.broadcast();
+  static StreamController<String> _getRegistrationIdListener =
+      new StreamController.broadcast();
+  static StreamController<bool> _connectionChangeListener =
+      new StreamController.broadcast();
+  static StreamController<Map> _receiveExtrasListener =
+      new StreamController.broadcast();
 
   /**
    * 监听：接收推送事件
    */
-  static void addReceiveNotificationListener (void onData( JPushNotification notification ) ) {
+  static void addReceiveNotificationListener(
+      void onData(JPushNotification notification)) {
     listeners[onData] = _recvNotificationListener.stream.listen(onData);
   }
 
@@ -621,7 +557,8 @@ class FlutterJpush {
    * 取消监听：接收推送事件
    * @param {Function} cb = (Object）=> {}
    */
-  static void removeReceiveNotificationListener (void onData( JPushNotification notification )) {
+  static void removeReceiveNotificationListener(
+      void onData(JPushNotification notification)) {
     removeListener(onData);
   }
 
@@ -629,7 +566,8 @@ class FlutterJpush {
    * 监听：点击推送事件
    * @param {Function} cb  = (Object）=> {}
    */
-  static void addReceiveOpenNotificationListener (void onData( JPushNotification notification )) {
+  static void addReceiveOpenNotificationListener(
+      void onData(JPushNotification notification)) {
     listeners[onData] = _recvOpenNotificationListener.stream.listen(onData);
   }
 
@@ -637,7 +575,8 @@ class FlutterJpush {
    * 取消监听：点击推送事件
    * @param {Function} cb  = (Object）=> {}
    */
-  static void removeReceiveOpenNotificationListener (void onData( JPushNotification notification )) {
+  static void removeReceiveOpenNotificationListener(
+      void onData(JPushNotification notification)) {
     removeListener(onData);
   }
 
@@ -646,14 +585,15 @@ class FlutterJpush {
    *
    * If device register succeed, the server will return registrationId
    */
-  static void addGetRegistrationIdListener (void onData(String registrationId)) {
+  static void addGetRegistrationIdListener(void onData(String registrationId)) {
     listeners[onData] = _getRegistrationIdListener.stream.listen(onData);
   }
 
   /**
    * Android Only
    */
-  static void removeGetRegistrationIdListener (void onData(String registrationId)) {
+  static void removeGetRegistrationIdListener(
+      void onData(String registrationId)) {
     removeListener(onData);
   }
 
@@ -663,10 +603,9 @@ class FlutterJpush {
    * 如果连接状态变更为已连接返回 true
    * 如果连接状态变更为断开连接连接返回 false
    */
-  static void addConnectionChangeListener ( void onData(bool state) ) {
+  static void addConnectionChangeListener(void onData(bool state)) {
     listeners[onData] = _connectionChangeListener.stream.listen(onData);
   }
-
 
   /**
    * 监听：连接状态变更
@@ -674,7 +613,7 @@ class FlutterJpush {
    * 如果连接状态变更为已连接返回 true
    * 如果连接状态变更为断开连接连接返回 false
    */
-  static removeConnectionChangeListener (void onData(bool state)) {
+  static removeConnectionChangeListener(void onData(bool state)) {
     removeListener(onData);
   }
 
@@ -683,11 +622,11 @@ class FlutterJpush {
    * @param {Function} cb = (map) => { }
    * 返回 Object，属性和值在 Native 定义
    */
-  static addReceiveExtrasListener ( void onData(Map extra) ) {
+  static addReceiveExtrasListener(void onData(Map extra)) {
     listeners[onData] = _receiveExtrasListener.stream.listen(onData);
   }
 
-  static removeReceiveExtrasListener (void onData(Map extra)) {
+  static removeReceiveExtrasListener(void onData(Map extra)) {
     removeListener(onData);
   }
 
@@ -695,16 +634,15 @@ class FlutterJpush {
    * 获取 RegistrationId
    * @param {Function} cb = (String) => { }
    */
-  static Future<String> getRegistrationID () async {
+  static Future<String> getRegistrationID() async {
     return await _channel.invokeMethod("getRegistrationID");
   }
-
 
   /**
    * iOS Only
    * @param {Function} cb = (String) => { } // 返回 appKey
    */
-  static Future<String> getAppkeyWithcallback () async {
+  static Future<String> getAppkeyWithcallback() async {
     return await _channel.invokeMethod("getAppkeyWithcallback");
   }
 
@@ -712,7 +650,7 @@ class FlutterJpush {
    * iOS Only
    * @param {Function} cb = (int) => { } // 返回应用 icon badge。
    */
-  static Future<int> getBadge () async {
+  static Future<int> getBadge() async {
     return await _channel.invokeMethod("getApplicationIconBadge");
   }
 
@@ -727,26 +665,23 @@ class FlutterJpush {
    * @param {Object} userInfo 推送的附加字段 选填
    * @param {String} soundName 自定义通知声音，设置为 null 为默认声音
    */
-  static Future<void> setLocalNotification ({double date,
-    String textContain,
-    int badge,
-    String alertAction,
-    String notificationKey,
-    dynamic userInfo,
-    String soundName
-  }) async{
-    await _channel.invokeMethod(
-        "setLocalNotification",
-        {
-          "date":date,
-          "textContain":textContain,
-          "badge":badge,
-          "alertAction":alertAction,
-          "notificationKey":notificationKey,
-          "userInfo":userInfo,
-          "soundName":soundName
-        }
-    );
+  static Future<void> setLocalNotification(
+      {double date,
+      String textContain,
+      int badge,
+      String alertAction,
+      String notificationKey,
+      dynamic userInfo,
+      String soundName}) async {
+    await _channel.invokeMethod("setLocalNotification", {
+      "date": date,
+      "textContain": textContain,
+      "badge": badge,
+      "alertAction": alertAction,
+      "notificationKey": notificationKey,
+      "userInfo": userInfo,
+      "soundName": soundName
+    });
   }
 
   /**
@@ -770,8 +705,9 @@ class FlutterJpush {
   /**
    * @param {Notification} notification
    */
-  static Future<void> sendLocalNotification (JPushNotification notification) async {
-    await _channel.invokeMethod("sendLocalNotification",notification);
+  static Future<void> sendLocalNotification(
+      JPushNotification notification) async {
+    await _channel.invokeMethod("sendLocalNotification", notification);
   }
 
   /**
@@ -779,8 +715,7 @@ class FlutterJpush {
    * 设置应用 Badge（小红点）
    * @param {Int} badge
    */
-  static Future<void> setBadge (int badge) async{
-    await _channel.invokeMethod("setBadge",badge);
+  static Future<void> setBadge(int badge) async {
+    await _channel.invokeMethod("setBadge", badge);
   }
-
 }
