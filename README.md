@@ -23,7 +23,7 @@ Flutter 版本 jpush（极光推送），目前正在开发，预计本周开发
 
 ## 申请key
 
-进入[这里]申请key
+进入[这里](https://www.jiguang.cn/dev/#/app/create)申请key
 
 #### ios 证书申请
 
