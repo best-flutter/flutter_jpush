@@ -1,8 +1,9 @@
 #include "AppDelegate.h"
 #include "GeneratedPluginRegistrant.h"
 
+#include "FlutterJPushPlugin.h"
+
 #include <JPUSHService.h>
-#include <FlutterJpushPlugin.h>
 #ifdef NSFoundationVersionNumber_iOS_9_x_Max
 #import <UserNotifications/UserNotifications.h>
 #endif
@@ -10,7 +11,7 @@
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    [[FlutterJPushPlugin sharedInstance]startup:launchOptions appKey:@"2e8ee4e12160f1d3501bce0c" channel:@"jpush" isProduction:FALSE];
+ [[FlutterJPushPlugin sharedInstance]startup:launchOptions appKey:@"2e8ee4e12160f1d3501bce0c" channel:@"jpush" isProduction:FALSE];
     
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
