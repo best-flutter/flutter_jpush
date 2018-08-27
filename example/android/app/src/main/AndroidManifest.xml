@@ -6,13 +6,7 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
-    <!-- Required -->
-    <permission
-        android:name="com.jzoom.pushtest.permission.JPUSH_MESSAGE"
-        android:protectionLevel="signature" />
 
-    <!-- Required  一些系统要求的权限，如访问网络等-->
-    <uses-permission android:name="com.jzoom.pushtest.permission.JPUSH_MESSAGE" />
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
