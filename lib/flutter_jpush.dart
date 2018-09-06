@@ -149,7 +149,7 @@ class JPushResult {
   //code = 0 正确
   final int code;
 
-  JPushResult({this.code: null, this.result});
+  JPushResult({this.code, this.result});
 
   bool get isOk => code == 0;
 }
@@ -166,7 +166,7 @@ class FlutterJPush {
   }
 
   static Future<dynamic> _handler(MethodCall call) {
-    print("handle mehtod call ${call.method} ${call.arguments}");
+    //print("handle mehtod call ${call.method} ${call.arguments}");
     String method = call.method;
     switch (method) {
       case 'connectionChange':
@@ -217,9 +217,7 @@ class FlutterJPush {
     return new Future.value(null);
   }
 
-  /**
-   * 初始化JPush 必须先初始化才能执行其他操作
-   */
+  /// 初始化JPush 必须先初始化才能执行其他操作
   static Future<void> initPush() async {
     if (Platform.isAndroid) {
       await _channel.invokeMethod("initPush");
@@ -231,22 +229,17 @@ class FlutterJPush {
   /**
    * iOS Only
    * 初始化 Jpush SDK 代码,
-   * NOTE: 如果已经在原生 SDK 中添加初始化代码则无需再调用 （通过脚本配置，会自动在原生中添加初始化，无需额外调用）
    */
   static Future<void> setupPush() async {
     await _channel.invokeMethod("setupPush");
   }
 
-  /**
-   * 停止推送，调用该方法后将不再受到推送
-   */
+  /// 停止推送，调用该方法后将不再受到推送
   static Future<void> stopPush() async {
     await _channel.invokeMethod("stopPush");
   }
 
-  /**
-   * 恢复推送功能，停止推送后，可调用该方法重新获得推送能力
-   */
+  /// 恢复推送功能，停止推送后，可调用该方法重新获得推送能力
   static Future<void> resumePush() async {
     if (Platform.isAndroid) {
       await _channel.invokeMethod("resumePush");
@@ -500,7 +493,6 @@ class FlutterJPush {
    * @deprecated Since version 2.2.0, will deleted in 3.0.0.
    * iOS Only
    * 取消监听：应用没有启动的状态点击推送打开应用
-   * @param {Function} cb = () => {}
    */
   static removeOpenNotificationLaunchAppEventListener(
       void onData(String registrationId)) {
@@ -511,7 +503,6 @@ class FlutterJPush {
    * iOS Only
    *
    * 监听：应用连接已登录
-   * @param {Function} cb = () => {}
    */
   static void addnetworkDidLoginListener(void onData(String registrationId)) {
     listeners[onData] = _networkDidLoginListenerListener.stream.listen(onData);
@@ -521,7 +512,6 @@ class FlutterJPush {
    * iOS Only
    *
    * 取消监听：应用连接已登录
-   * @param {Function} cb = () => {}
    */
   static void removenetworkDidLoginListener(
       void onData(String registrationId)) {
@@ -555,7 +545,6 @@ class FlutterJPush {
 
   /**
    * 取消监听：接收推送事件
-   * @param {Function} cb = (Object）=> {}
    */
   static void removeReceiveNotificationListener(
       void onData(JPushNotification notification)) {
@@ -564,7 +553,6 @@ class FlutterJPush {
 
   /**
    * 监听：点击推送事件
-   * @param {Function} cb  = (Object）=> {}
    */
   static void addReceiveOpenNotificationListener(
       void onData(JPushNotification notification)) {
@@ -573,7 +561,6 @@ class FlutterJPush {
 
   /**
    * 取消监听：点击推送事件
-   * @param {Function} cb  = (Object）=> {}
    */
   static void removeReceiveOpenNotificationListener(
       void onData(JPushNotification notification)) {
@@ -599,7 +586,6 @@ class FlutterJPush {
 
   /**
    * 监听：连接状态变更
-   * @param {Function} cb = (Boolean) => { }
    * 如果连接状态变更为已连接返回 true
    * 如果连接状态变更为断开连接连接返回 false
    */
@@ -609,7 +595,6 @@ class FlutterJPush {
 
   /**
    * 监听：连接状态变更
-   * @param {Function} cb = (Boolean) => { }
    * 如果连接状态变更为已连接返回 true
    * 如果连接状态变更为断开连接连接返回 false
    */
@@ -619,7 +604,6 @@ class FlutterJPush {
 
   /**
    * 监听：收到 Native 下发的 extra 事件
-   * @param {Function} cb = (map) => { }
    * 返回 Object，属性和值在 Native 定义
    */
   static addReceiveExtrasListener(void onData(Map extra)) {
@@ -632,7 +616,6 @@ class FlutterJPush {
 
   /**
    * 获取 RegistrationId
-   * @param {Function} cb = (String) => { }
    */
   static Future<String> getRegistrationID() async {
     return await _channel.invokeMethod("getRegistrationID");
@@ -640,7 +623,6 @@ class FlutterJPush {
 
   /**
    * iOS Only
-   * @param {Function} cb = (String) => { } // 返回 appKey
    */
   static Future<String> getAppkeyWithcallback() async {
     return await _channel.invokeMethod("getAppkeyWithcallback");
@@ -648,7 +630,6 @@ class FlutterJPush {
 
   /**
    * iOS Only
-   * @param {Function} cb = (int) => { } // 返回应用 icon badge。
    */
   static Future<int> getBadge() async {
     return await _channel.invokeMethod("getApplicationIconBadge");

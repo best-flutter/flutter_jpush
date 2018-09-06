@@ -33,6 +33,7 @@ class _MyAppState extends State<MyApp> {
         print("连接状态改变:$connected");
         this.isConnected = connected;
         if (connected) {
+
           FlutterJPush.getRegistrationID().then((String regId) {
             print("主动获取设备号:$regId");
             setState(() {
