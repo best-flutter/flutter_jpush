@@ -1,6 +1,14 @@
+<p align="center">
+    <a href="https://pub.flutter-io.cn/packages/flutter_jpush">
+        <img src="https://img.shields.io/pub/v/flutter_jpush.svg" alt="pub package" />
+    </a>
+</p>
+
+
 # flutter_jpush
 
 Flutter 版本 jpush（极光推送），经过热心网友帮助，终于开发完成，目前功能比较稳定，已经上到pub。
+
 
 
 ## ROADMAP
@@ -268,6 +276,7 @@ if (result.isOk) {
 ```
 
 
+## 还有疑问的话可以发issue或者加qq群854192563交流
 
 
 

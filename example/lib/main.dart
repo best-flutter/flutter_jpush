@@ -33,7 +33,6 @@ class _MyAppState extends State<MyApp> {
         print("连接状态改变:$connected");
         this.isConnected = connected;
         if (connected) {
-
           FlutterJPush.getRegistrationID().then((String regId) {
             print("主动获取设备号:$regId");
             setState(() {
@@ -52,8 +51,8 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    FlutterJPush
-        .addReceiveNotificationListener((JPushNotification notification) {
+    FlutterJPush.addReceiveNotificationListener(
+        (JPushNotification notification) {
       setState(() {
         /// 收到推送
         print("收到推送提醒: $notification");
@@ -61,8 +60,8 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    FlutterJPush
-        .addReceiveOpenNotificationListener((JPushNotification notification) {
+    FlutterJPush.addReceiveOpenNotificationListener(
+        (JPushNotification notification) {
       setState(() {
         print("打开了推送提醒: $notification");
 
