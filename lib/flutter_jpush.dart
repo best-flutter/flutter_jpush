@@ -89,7 +89,7 @@ class JPushNotification {
 
         return new JPushNotification(
           title: dic['title'], //推送标题
-          alertType: dic['alerType'] as int, //此字段应为alerType
+          alertType: int.parse(dic['alerType']), //此字段应为alerType
           content: content,
           extras: dic['extras'], //附加字段
           id: dic['id'] as int,
