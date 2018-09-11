@@ -21,37 +21,26 @@ Flutter 版本 jpush（极光推送），经过热心网友帮助，终于开发
 * [x] 集成tags
 * [ ] 后台接口放出服务
 * [x] 可以运行的例子
-* [x] 用户可相互自行推送
+* [ ] 用户可相互自行推送
 
 
-## 集成过程
 
-### 准备工作
 
-#### 申请key
+# 准备工作
 
 ## 申请key
 
 进入[这里](https://www.jiguang.cn/dev/#/app/create)申请key
 
-#### ios 证书申请
+## ios 证书申请
 
 >不熟悉怎么申请戳[这里](https://www.jianshu.com/p/ae11b893284b)
 
-### ios 集成
+
+# 集成
 
 
-### android 集成
-
-
-
-## API调用
-
-
-
-### 1、启动
-
-注意启动需要修改一下原生项目，这个官方也没有比较好的解决方案，所以必须做。
+## ios 集成
 
 ios 修改 AppDelegate.m
 ```
@@ -136,8 +125,33 @@ didReceiveLocalNotification:(UILocalNotification *)notification {
 
 ```
 
-android:
-无须修改原生项目
+## android 集成
+
+修改 `你的项目目录/android/app/build.gradle`
+
+在`android/defaultConfig`节点修改`manifestPlaceholders`,新增极光推送key配置
+
+```
+android {
+    .... 你的代码
+
+    defaultConfig {
+        .....
+        manifestPlaceholders = [
+               JPUSH_PKGNAME : applicationId,
+               JPUSH_APPKEY : "你的极光推送key", //JPush上注册的包名对应的appkey.
+               JPUSH_CHANNEL : "你的推送渠道，如果不知道填写developer-default即可",
+        ]
+
+    }
+
+```
+
+
+# API调用
+
+### 1、启动
+
 
 dart:
 
@@ -174,7 +188,7 @@ FlutterJPush.addnetworkDidLoginListener((String registrationId) {
 或者主动去取
 
 ```
-FlutterJPush.getRegistrationID()
+await FlutterJPush.getRegistrationID()
 ```
 
 主动去取有可能取出来是空的
@@ -273,6 +287,25 @@ if (result.isOk) {
       });
     });
 
+```
+
+## 目前这个版本还存在编译问题，flutter官方也在积极解决
+真机运行报错couldn't find "libflutter.so"
+
+暂时的解决方法有：
+
+build.gradle设置
+
+```
+ndk{
+     abiFilters 'armeabi', 'armeabi-v7a'//, 'arm64-v8a'
+}
+```
+
+或者可以增加编译选项：
+
+```
+--target-platform android-arm64 或者 --target-platform android-arm
 ```
 
 
