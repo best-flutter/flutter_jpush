@@ -88,8 +88,10 @@ class JPushNotification {
         String content = dic['alertContent'];
 
         return new JPushNotification(
-          alertType: dic['alertType'] as int,
+          title: dic['title'], //推送标题
+          alertType: dic['alerType'] as int, //此字段应为alerType
           content: content,
+          extras: dic['extras'], //附加字段
           id: dic['id'] as int,
           fromOpen: fromOpen,
           fireTime: new DateTime.now(),
