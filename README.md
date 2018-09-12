@@ -42,86 +42,36 @@ Flutter 版本 jpush（极光推送），经过热心网友帮助，终于开发
 
 ## ios 集成
 
-ios 修改 AppDelegate.m
+ios 修改 AppDelegate.m,新版本一行代码就可以集成了
 ```
+增加
+#include "FlutterJPushPlugin.h"
+
+增加
+ [self startupJPush:launchOptions appKey:@"你的key" channel:@"你的渠道" isProduction:是否生产版本];
+
+```
+
+全部的AppDelegate.m如下:
+
+```
+#include "AppDelegate.h"
+#include "GeneratedPluginRegistrant.h"
+#include "FlutterJPushPlugin.h"
+
+@implementation AppDelegate
+
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
- [[FlutterJPushPlugin sharedInstance]startup:launchOptions appKey:@"你的key" channel:@"你的渠道" 
-    isProduction:  是不是生产版本];
-    
-  [GeneratedPluginRegistrant registerWithRegistry:self];
+
+   [self startupJPush:launchOptions appKey:@"你的key" channel:@"你的渠道" isProduction:是否生产版本];
+    [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-/// 注意底下的代码和ios的application生命周期有关。
-- (void)applicationWillResignActive:(UIApplication *)application {
-}
 
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-    [[UIApplication sharedApplication] setApplicationIconBadgeNumber:0];
-}
-
-- (void)applicationWillEnterForeground:(UIApplication *)application {
-    [application setApplicationIconBadgeNumber:0];
-    [application cancelAllLocalNotifications];
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application {
-}
-
-- (void)applicationWillTerminate:(UIApplication *)application {
-}
-
-- (void)application:(UIApplication *)application
-didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
-    NSLog(@"%@", [NSString stringWithFormat:@"Device Token: %@", deviceToken]);
-    [JPUSHService registerDeviceToken:deviceToken];
-}
-
-- (void)application:(UIApplication *)application
-didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-    NSLog(@"did Fail To Register For Remote Notifications With Error: %@", error);
-}
-
-#if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_7_1
-- (void)application:(UIApplication *)application
-didRegisterUserNotificationSettings:
-(UIUserNotificationSettings *)notificationSettings {
-}
-
-
-- (void)application:(UIApplication *)application
-handleActionWithIdentifier:(NSString *)identifier
-forLocalNotification:(UILocalNotification *)notification
-  completionHandler:(void (^)())completionHandler {
-}
-
-- (void)application:(UIApplication *)application
-handleActionWithIdentifier:(NSString *)identifier
-forRemoteNotification:(NSDictionary *)userInfo
-  completionHandler:(void (^)())completionHandler {
-}
-#endif
-
-- (void)application:(UIApplication *)application
-didReceiveRemoteNotification:(NSDictionary *)userInfo {
-    [JPUSHService handleRemoteNotification:userInfo];
-}
-
-- (void)application:(UIApplication *)application
-didReceiveRemoteNotification:(NSDictionary *)userInfo
-fetchCompletionHandler:
-(void (^)(UIBackgroundFetchResult))completionHandler {
-    [JPUSHService handleRemoteNotification:userInfo];
-    completionHandler(UIBackgroundFetchResultNewData);
-}
-
-- (void)application:(UIApplication *)application
-didReceiveLocalNotification:(UILocalNotification *)notification {
-    [JPUSHService showLocalNotificationAtFront:notification identifierKey:nil];
-}
-
+@end
 
 ```
 
