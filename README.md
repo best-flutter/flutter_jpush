@@ -239,6 +239,15 @@ if (result.isOk) {
 
 ```
 
+
+#### 7、停止和继续接收消息
+```
+ /// 停止推送，调用该方法后将不再受到推送
+  static Future<void> stopPush() async
+// 恢复推送功能，停止推送后，可调用该方法重新获得推送能力
+  static Future<void> resumePush() async
+```
+
 ## 目前这个版本还存在编译问题，flutter官方也在积极解决
 真机运行报错couldn't find "libflutter.so"
 
